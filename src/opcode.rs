@@ -2003,3 +2003,28 @@ opcode! {
         Entry(sqe)
     }
 }
+
+opcode! {
+    /// A file/device-specific 16-byte command, akin (but not equivalent) to `ioctl(2)`.
+    pub struct SohuSendCmd {
+        fd: { impl sealed::UseFixed },
+        cmd_op: { u32 },
+        addr: { *mut u8 },
+        len: { u32 },
+        ;;
+    }
+
+    pub const CODE = sys::IORING_OP_URING_CMD;
+
+    pub fn build(self) -> Entry {
+        let SohuSendCmd { fd, cmd_op, addr, len } = self;
+
+        let mut sqe = sqe_zeroed();
+        sqe.opcode = Self::CODE;
+        assign_fd!(sqe.fd = fd);
+        sqe.__bindgen_anon_1.__bindgen_anon_1.cmd_op = cmd_op;
+        sqe.__bindgen_anon_2.addr = addr as _;
+        sqe.len = len;
+        Entry(sqe)
+    }
+}
